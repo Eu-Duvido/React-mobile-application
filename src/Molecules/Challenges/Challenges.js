@@ -34,11 +34,11 @@ const scorers = [
   { id: 5, name: 'Rafael', points: 110, level: 4, avatar: require('../../../assets/images/5.png') },
   { id: 6, name: 'Beatriz', points: 105, level: 3, avatar: require('../../../assets/images/6.png') },
   { id: 7, name: 'João', points: 98, level: 3, avatar: require('../../../assets/images/7.png') },
-  { id: 8, name: 'Camila', points: 92, level: 3, avatar: require('../../../assets/images/8.png') },
-  { id: 9, name: 'Diego', points: 88, level: 2, avatar: require('../../../assets/images/9.png') },
-  { id: 10, name: 'Fernanda', points: 80, level: 2, avatar: require('../../../assets/images/1.png') },
-  { id: 11, name: 'Bruno', points: 72, level: 2, avatar: require('../../../assets/images/1.png') },
-  { id: 12, name: 'Larissa', points: 65, level: 1, avatar: require('../../../assets/images/1.png') },
+  { id: 8, name: 'Camila', points: 92, level: 3, avatar: require('../../../assets/images/1.png') },
+  { id: 9, name: 'Diego', points: 88, level: 2, avatar: require('../../../assets/images/2.png') },
+  { id: 10, name: 'Fernanda', points: 80, level: 2, avatar: require('../../../assets/images/3.png') },
+  { id: 11, name: 'Bruno', points: 72, level: 2, avatar: require('../../../assets/images/4.png') },
+  { id: 12, name: 'Larissa', points: 65, level: 1, avatar: require('../../../assets/images/5.png') },
 ]
 
 

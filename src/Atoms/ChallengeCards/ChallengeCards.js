@@ -20,10 +20,6 @@ const imagesList = [
   require('../../../assets/images/5.png'),
   require('../../../assets/images/6.png'),
   require('../../../assets/images/7.png'),
-  require('../../../assets/images/8.png'),
-  require('../../../assets/images/9.png'),
-  require('../../../assets/images/10.png'),
-  require('../../../assets/images/11.png'),
 ]
 
 const shuffle = (arr) => {
