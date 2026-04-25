@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import { useState, useMemo, useCallback } from 'react'
+import { View, ActivityIndicator } from 'react-native'
 import { Text } from 'react-native-paper'
+import { useFocusEffect } from '@react-navigation/native'
 import {
   Header,
   CarrouselContainer,
@@ -8,125 +9,33 @@ import {
   CarrouselWrapper,
 } from './ChallengeChip.styles'
 import ChallengeCards from '../ChallengeCards/ChallengeCards'
+import { useChallenges } from '../../hooks/useChallenges'
 
-export default function ChallengeChip() {
-  const navigation = useNavigation()
-
-  const [selected, setSelected] = useState('active')
-  const [showAll, setShowAll] = useState(false)
-
-  /* ===== CHIPS ===== */
-  const challenges = [
-    { label: 'Ativos', status: 'active' },
-    { label: 'Pendentes', status: 'pending' },
-    { label: 'Concluídos', status: 'completed' },
-    { label: 'Derrotado', status: 'defeated' },
-  ]
-
-  /* ===== LISTA COMPLETA ===== */
- const challengeList = [
-  {
-    title: 'Estudo diário',
-    subtitle: 'Estudar 2 horas por dia durante 30 dias',
-    progress: 0.7,
-    status: 'active',
-    genre: 'education',
-    difficulty: 'hard',
-  },
-  {
-    title: 'Prática de exercícios',
-    subtitle: 'Resolver 10 exercícios de programação por dia',
-    progress: 0.4,
-    status: 'active',
-    genre: 'education',
-    difficulty: 'medium',
-  },
-  {
-    title: 'Leitura acadêmica',
-    subtitle: 'Ler 20 páginas de um livro técnico por dia',
-    progress: 0.6,
-    status: 'active',
-    genre: 'education',
-    difficulty: 'easy',
-  },
-  {
-    title: 'Revisão de conteúdo',
-    subtitle: 'Revisar matérias estudadas durante a semana',
-    progress: 0.5,
-    status: 'pending',
-    genre: 'education',
-    difficulty: 'medium',
-  },
-  {
-    title: 'Criar resumo',
-    subtitle: 'Fazer resumos das aulas da semana',
-    progress: 0.1,
-    status: 'pending',
-    genre: 'education',
-    difficulty: 'easy',
-  },
-  {
-    title: 'Novo curso',
-    subtitle: 'Iniciar um curso online de programação',
-    progress: 0,
-    status: 'pending',
-    genre: 'education',
-    difficulty: 'medium',
-  },
-  {
-    title: 'Curso concluído',
-    subtitle: 'Finalizar um curso completo online',
-    progress: 1,
-    status: 'completed',
-    genre: 'education',
-    difficulty: 'hard',
-  },
-  {
-    title: 'Semana de estudos',
-    subtitle: 'Estudar todos os dias durante 7 dias',
-    progress: 1,
-    status: 'completed',
-    genre: 'education',
-    difficulty: 'medium',
-  },
-  {
-    title: 'Currículo atualizado',
-    subtitle: 'Adicionar novos cursos e certificações no currículo',
-    progress: 1,
-    status: 'completed',
-    genre: 'education',
-    difficulty: 'easy',
-  },
-  {
-    title: 'Plano de estudos falhou',
-    subtitle: 'Não seguir o plano de estudos semanal',
-    progress: 0.2,
-    status: 'defeated',
-    genre: 'education',
-    difficulty: 'medium',
-  },
-  {
-    title: 'Rotina de estudos',
-    subtitle: 'Manter rotina de estudos pela manhã',
-    progress: 0.3,
-    status: 'defeated',
-    genre: 'education',
-    difficulty: 'hard',
-  },
-  {
-    title: 'Estudar inglês',
-    subtitle: 'Praticar inglês todos os dias',
-    progress: 0.4,
-    status: 'defeated',
-    genre: 'education',
-    difficulty: 'medium',
-  },
+const CHIPS = [
+  { label: 'Ativos', status: 'active' },
+  { label: 'Concluídos', status: 'completed' },
+  { label: 'Derrotado', status: 'defeated' },
 ]
 
+export default function ChallengeChip({ userId, search = '' }) {
+  const [selected, setSelected] = useState('active')
+  const [showAll, setShowAll] = useState(false)
+  const { challenges, loading, error, refetch } = useChallenges(userId)
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch()
+    }, [refetch])
+  )
+
   const listFiltered = useMemo(() => {
-    if (showAll) return challengeList
-    return challengeList.filter((item) => item.status === selected)
-  }, [showAll, selected])
+    let list = showAll ? challenges : challenges.filter((item) => item.status === selected)
+    if (search) {
+      const q = search.toLowerCase()
+      list = list.filter((item) => item.title?.toLowerCase().includes(q))
+    }
+    return list
+  }, [showAll, selected, challenges, search])
 
   return (
     <>
@@ -134,7 +43,6 @@ export default function ChallengeChip() {
         <Text variant="bodyLarge" style={{ fontWeight: 'bold' }}>
           Meus desafios
         </Text>
-
         <Text
           variant="bodyMedium"
           style={{ opacity: 0.7 }}
@@ -146,9 +54,8 @@ export default function ChallengeChip() {
 
       <CarrouselWrapper>
         <CarrouselContainer>
-          {challenges.map((item) => {
+          {CHIPS.map((item) => {
             const isActive = selected === item.status
-
             return (
               <CarrouselItem
                 key={item.status}
@@ -157,8 +64,7 @@ export default function ChallengeChip() {
                 disabled={showAll}
                 style={{ opacity: showAll ? 0.4 : 1 }}
                 onPress={() => {
-                  if (showAll) return
-                  setSelected(item.status)
+                  if (!showAll) setSelected(item.status)
                 }}
               >
                 <Text
@@ -177,7 +83,19 @@ export default function ChallengeChip() {
         </CarrouselContainer>
       </CarrouselWrapper>
 
-      <ChallengeCards challenges={listFiltered} />
+      {loading ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator color="#1c1c1e" size="large" />
+        </View>
+      ) : error ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+          <Text variant="bodyMedium" style={{ opacity: 0.5, textAlign: 'center' }}>
+            Não foi possível carregar os desafios.{'\n'}Verifique se o backend está rodando na porta 8080.
+          </Text>
+        </View>
+      ) : (
+        <ChallengeCards challenges={listFiltered} />
+      )}
     </>
   )
 }

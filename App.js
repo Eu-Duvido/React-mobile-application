@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font'
 import { Text } from 'react-native'
 import Routes from './src/routes'
 import { theme } from './src/Theme/Theme'
+import { UserProvider } from './src/contexts/UserContext'
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -17,7 +18,9 @@ export default function App() {
 
   return (
     <PaperProvider theme={theme}>
-      <Routes />
+      <UserProvider>
+        <Routes />
+      </UserProvider>
     </PaperProvider>
   )
 }

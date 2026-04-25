@@ -1,32 +1,32 @@
-import React, { Component } from 'react';
-import { TextInput } from 'react-native-paper';
-import { Container } from './InputHome.styles';
-import { Input } from './InputHome.styles';
+import React, { useState, useRef } from 'react'
+import { TextInput } from 'react-native-paper'
+import { Container, Input } from './InputHome.styles'
 
-class InputHome extends Component {
-  state = {
-    value: '',
-  };
+export default function InputHome({ onSearch }) {
+  const [value, setValue] = useState('')
+  const timerRef = useRef(null)
 
-  render() {
-    const { value } = this.state;
-
-    return (
-      <Container>
-        <Input
-        outlineStyle={{ borderRadius: 20 }}
-         activeOutlineColor="#1d1d1d"
-          outlineColor="#1d1d1d"
-          textColor="#1d1d1d"
-          mode="outlined"
-          value={value}
-          onChangeText={(text) => this.setState({ value: text })}
-          placeholder="Digite aqui"
-          right={<TextInput.Icon icon="magnify" />}
-        />
-      </Container>
-    );
+  const handleChange = (text) => {
+    setValue(text)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      if (onSearch) onSearch(text.trim())
+    }, 300)
   }
-}
 
-export default InputHome;
+  return (
+    <Container>
+      <Input
+        outlineStyle={{ borderRadius: 20 }}
+        activeOutlineColor="#1d1d1d"
+        outlineColor="#1d1d1d"
+        textColor="#1d1d1d"
+        mode="outlined"
+        value={value}
+        onChangeText={handleChange}
+        placeholder="Buscar desafios"
+        right={<TextInput.Icon icon="magnify" />}
+      />
+    </Container>
+  )
+}
