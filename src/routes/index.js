@@ -10,7 +10,6 @@ import CreateChallenge from '../Molecules/CreateChallenge/CreateChallenge'
 import Invites from '../Molecules/Invites/Invites'
 import Login from '../Molecules/Login/Login'
 import Dashboard from '../Molecules/Dashboard/Dashboard'
-import InepDashboard from '../Molecules/InepDashboard/InepDashboard'
 
 const Stack = createNativeStackNavigator()
 
@@ -31,7 +30,6 @@ function AppStack() {
       <Stack.Screen name="CreateChallenge" component={CreateChallenge} />
       <Stack.Screen name="Invites" component={Invites} />
       <Stack.Screen name="Dashboard" component={Dashboard} />
-      <Stack.Screen name="InepDashboard" component={InepDashboard} />
     </Stack.Navigator>
   )
 }

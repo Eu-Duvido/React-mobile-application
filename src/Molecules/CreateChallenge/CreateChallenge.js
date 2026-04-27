@@ -186,7 +186,7 @@ export default function CreateChallenge() {
         <FieldLabel>TÍTULO</FieldLabel>
         <TextInput
           mode="outlined"
-          placeholder="Ex: Correr 5km todo dia"
+          placeholder="Ex: Ler cinco livros"
           value={title}
           onChangeText={setTitle}
           outlineStyle={{ borderRadius: 14 }}

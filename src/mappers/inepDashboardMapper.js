@@ -6,17 +6,17 @@ export const fmt = (n) => {
   return String(n)
 }
 
-// KPI cards do resumo geral (usa o ano mais recente)
+// KPI cards do resumo geral
 export const toResumoCards = (resumoGeral) => {
   const row = resumoGeral[0]
   if (!row) return []
   return [
-    { label: 'IES',           value: fmt(row.totalIes),          icon: '🏛️', color: '#2196F3', bg: '#E3F2FD' },
-    { label: 'Cursos',        value: fmt(row.totalCursos),        icon: '📚', color: '#9C27B0', bg: '#F3E5F5' },
-    { label: 'Ingressantes',  value: fmt(row.totalIngressantes),  icon: '🎓', color: '#00897B', bg: '#E0F2F1' },
-    { label: 'Concluintes',   value: fmt(row.totalConcluintes),   icon: '✅', color: '#4CAF50', bg: '#E8F5E9' },
-    { label: 'Conclusão',     value: `${row.taxaConclusaoPct ?? 0}%`, icon: '📊', color: '#FF9800', bg: '#FFF3E0' },
-    { label: 'Via ENEM',      value: `${row.pctEnem ?? 0}%`,     icon: '📝', color: '#E53935', bg: '#FFEBEE' },
+    { label: 'IES',           value: fmt(row.totalIes),                        icon: '🏛️', color: '#2196F3', bg: '#E3F2FD' },
+    { label: 'Cursos',        value: fmt(row.totalCursos),                      icon: '📚', color: '#9C27B0', bg: '#F3E5F5' },
+    { label: 'Vagas',         value: fmt(row.totalVagas),                       icon: '🎫', color: '#00897B', bg: '#E0F2F1' },
+    { label: 'Ingressantes',  value: fmt(row.totalIngressantes),                icon: '🎓', color: '#FF9800', bg: '#FFF3E0' },
+    { label: 'Conclusão',     value: `${row.taxaConclusaoPct ?? 0}%`,           icon: '📊', color: '#4CAF50', bg: '#E8F5E9' },
+    { label: 'Via ENEM',      value: `${row.pctEnem ?? 0}%`,                   icon: '📝', color: '#E53935', bg: '#FFEBEE' },
   ]
 }
 
@@ -24,10 +24,12 @@ export const toResumoCards = (resumoGeral) => {
 export const toEadData = (ead) => {
   const total = ead.reduce((s, r) => s + Number(r.totalIngressantes ?? 0), 0)
   return ead.map((r) => ({
-    label: r.modalidade,
-    value: Number(r.totalIngressantes ?? 0),
+    label:      r.modalidade,
+    value:      Number(r.totalIngressantes ?? 0),
+    matriculados: Number(r.totalMatriculados ?? 0),
+    concluintes:  Number(r.totalConcluintes ?? 0),
+    numCursos:    Number(r.numCursos ?? 0),
     pct: total > 0 ? Math.round((Number(r.totalIngressantes ?? 0) / total) * 100) : 0,
-    numCursos: Number(r.numCursos ?? 0),
   }))
 }
 
@@ -36,29 +38,29 @@ export const toGeneroData = (genero) => {
   const row = genero[0]
   if (!row) return null
   return {
-    ano: row.nuAnoCenso,
-    feminino: Number(row.feminino ?? 0),
-    masculino: Number(row.masculino ?? 0),
-    pctFeminino: Number(row.pctFeminino ?? 0),
+    ano:          row.nuAnoCenso,
+    feminino:     Number(row.feminino ?? 0),
+    masculino:    Number(row.masculino ?? 0),
+    pctFeminino:  Number(row.pctFeminino ?? 0),
     pctMasculino: Number(row.pctMasculino ?? 0),
   }
 }
 
-// Raça: converte o objeto único em array ordenado por valor
+// Raça: converte objeto único em array ordenado por valor
 export const toRacaData = (raca) => {
   const row = raca[0]
   if (!row) return []
   return [
-    { label: 'Branca',        value: Number(row.branca ?? 0),        pct: Number(row.pctBranca ?? 0),    color: '#90CAF9' },
-    { label: 'Parda',         value: Number(row.parda ?? 0),         pct: Number(row.pctParda ?? 0),     color: '#A5D6A7' },
-    { label: 'Preta',         value: Number(row.preta ?? 0),         pct: Number(row.pctPreta ?? 0),     color: '#CE93D8' },
-    { label: 'Amarela',       value: Number(row.amarela ?? 0),       pct: 0,                             color: '#FFE082' },
-    { label: 'Indígena',      value: Number(row.indigena ?? 0),      pct: 0,                             color: '#FFAB91' },
-    { label: 'Não declarada', value: Number(row.corNaoDeclarada ?? 0), pct: 0,                           color: '#B0BEC5' },
+    { label: 'Branca',        value: Number(row.branca ?? 0),           pct: Number(row.pctBranca ?? 0),  color: '#90CAF9' },
+    { label: 'Parda',         value: Number(row.parda ?? 0),            pct: Number(row.pctParda ?? 0),   color: '#A5D6A7' },
+    { label: 'Preta',         value: Number(row.preta ?? 0),            pct: Number(row.pctPreta ?? 0),   color: '#CE93D8' },
+    { label: 'Amarela',       value: Number(row.amarela ?? 0),          pct: 0,                           color: '#FFE082' },
+    { label: 'Indígena',      value: Number(row.indigena ?? 0),         pct: 0,                           color: '#FFAB91' },
+    { label: 'Não declarada', value: Number(row.corNaoDeclarada ?? 0),  pct: 0,                           color: '#B0BEC5' },
   ].filter((r) => r.value > 0)
 }
 
-// Faixas etárias: converte o objeto único em array
+// Faixas etárias
 export const toEtariaData = (etaria) => {
   const row = etaria[0]
   if (!row) return []
@@ -74,27 +76,31 @@ export const toEtariaData = (etaria) => {
   ].filter((r) => r.value > 0)
 }
 
-// Ranking por área: já vem pronto
+// Ranking por área (agrupado)
 export const toRankingAreaData = (rankingArea) =>
   rankingArea.map((r) => ({
-    label: r.noAreaGeral?.replace('Área geral:', '').trim() ?? r.noAreaGeral,
-    value: Number(r.totalIngressantes ?? 0),
-    pct: Number(r.pctConclusao ?? 0),
+    label:     r.noAreaGeral?.replace('Área geral:', '').trim() ?? r.noAreaGeral,
+    value:     Number(r.totalIngressantes ?? 0),
+    pct:       Number(r.pctConclusao ?? 0),
     numCursos: Number(r.numCursos ?? 0),
+    matriculados: Number(r.totalMatriculados ?? 0),
+    concluintes:  Number(r.totalConcluintes ?? 0),
   }))
 
-// Ranking por região: agrupa por região para exibir top 5 de cada
+// Ranking por região: agrupa por região (top 3 cursos por região)
 export const toRankingRegiaoData = (rankingRegiao) => {
   const map = {}
   for (const r of rankingRegiao) {
     if (!map[r.noRegiao]) map[r.noRegiao] = []
-    map[r.noRegiao].push({
-      curso: r.noCurso,
-      area: r.noAreaGeral,
-      ingressantes: Number(r.totalIngressantes ?? 0),
-      pctConclusao: Number(r.pctConclusao ?? 0),
-      rank: Number(r.rankNaRegiao ?? 0),
-    })
+    if (map[r.noRegiao].length < 3) {
+      map[r.noRegiao].push({
+        curso:         r.noCurso,
+        area:          r.noAreaGeral,
+        ingressantes:  Number(r.totalIngressantes ?? 0),
+        pctConclusao:  Number(r.pctConclusao ?? 0),
+        rank:          Number(r.rankNaRegiao ?? 0),
+      })
+    }
   }
   return Object.entries(map).map(([regiao, cursos]) => ({ regiao, cursos }))
 }
@@ -102,11 +108,97 @@ export const toRankingRegiaoData = (rankingRegiao) => {
 // Top IES por taxa de conclusão
 export const toTaxaIesData = (taxaIes) =>
   taxaIes.map((r) => ({
-    nome: r.sgIes ?? r.noIes,
-    nomeCompleto: r.noIes,
-    uf: r.sgUf,
-    regiao: r.noRegiao,
-    taxaConclusao: Number(r.taxaConclusaoPct ?? 0),
-    taxaEvasao: Number(r.taxaEvasaoPct ?? 0),
-    matriculados: Number(r.totalMatriculados ?? 0),
+    nome:           r.sgIes ?? r.noIes,
+    nomeCompleto:   r.noIes,
+    uf:             r.sgUf,
+    regiao:         r.noRegiao,
+    taxaConclusao:  Number(r.taxaConclusaoPct ?? 0),
+    taxaEvasao:     Number(r.taxaEvasaoPct ?? 0),
+    matriculados:   Number(r.totalMatriculados ?? 0),
   }))
+
+// ── Insights Automáticos INEP ─────────────────────────────────────────────────
+
+export const generateInepInsights = (resumoGeral, ead, genero, etaria, rankingArea) => {
+  const insights = []
+  const row = resumoGeral[0]
+  if (!row) return insights
+
+  // Faixa etária alvo
+  const etariaRow = etaria[0]
+  if (etariaRow) {
+    const pct1824 = Number(etariaRow.pct1824 ?? 0)
+    if (pct1824 > 0) {
+      insights.push({
+        icon: '🎯',
+        color: '#2196F3',
+        bg: '#E3F2FD',
+        text: `${pct1824}% dos ingressantes têm 18-24 anos — o principal público-alvo do euDuvido está no centro do ensino superior.`,
+      })
+    }
+  }
+
+  // Oportunidade EAD
+  const eadTotal  = ead.reduce((s, e) => s + Number(e.totalIngressantes ?? 0), 0)
+  const eadRow    = ead.find(e => e.modalidade === 'EAD')
+  if (eadRow && eadTotal > 0) {
+    const pctEad  = Math.round((Number(eadRow.totalIngressantes) / eadTotal) * 100)
+    insights.push({
+      icon: '💻',
+      color: '#9C27B0',
+      bg: '#F3E5F5',
+      text: `EAD representa ${pctEad}% dos ingressantes (${fmt(Number(eadRow.totalIngressantes))} estudantes) — mercado online em crescimento acelerado.`,
+    })
+  }
+
+  // Perfil de gênero
+  const generoRow = genero[0]
+  if (generoRow) {
+    const pctF   = Number(generoRow.pctFeminino ?? 0)
+    const pctM   = Number(generoRow.pctMasculino ?? 0)
+    const dom    = pctF >= pctM ? 'feminino' : 'masculino'
+    const pctDom = Math.max(pctF, pctM)
+    insights.push({
+      icon: '👥',
+      color: '#E91E63',
+      bg: '#FCE4EC',
+      text: `Público ${dom} representa ${pctDom}% dos ingressantes — estratégias de conteúdo devem considerar esta maioria.`,
+    })
+  }
+
+  // Área líder
+  if (rankingArea.length > 0) {
+    const top     = rankingArea[0]
+    const area    = top.noAreaGeral?.replace('Área geral:', '').trim() ?? top.noAreaGeral
+    const pctConc = Number(top.pctConclusao ?? 0)
+    insights.push({
+      icon: '📚',
+      color: '#00897B',
+      bg: '#E0F2F1',
+      text: `"${area}" lidera com ${fmt(Number(top.totalIngressantes))} ingressantes e ${pctConc}% de taxa de conclusão.`,
+    })
+  }
+
+  // Taxa nacional de conclusão vs oportunidade
+  if (row.taxaConclusaoPct) {
+    const taxa = row.taxaConclusaoPct
+    insights.push({
+      icon: '📈',
+      color: '#FF9800',
+      bg: '#FFF3E0',
+      text: `Taxa nacional de conclusão do ensino superior: ${taxa}%. Um app que aumenta engajamento pode mover este número.`,
+    })
+  }
+
+  // ENEM como porta de entrada
+  if (row.pctEnem > 0) {
+    insights.push({
+      icon: '📝',
+      color: '#E53935',
+      bg: '#FFEBEE',
+      text: `${row.pctEnem}% dos ingressantes entraram via ENEM — jovens digitais que buscam ferramentas de apoio ao estudo.`,
+    })
+  }
+
+  return insights
+}
