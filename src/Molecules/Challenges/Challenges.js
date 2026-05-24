@@ -203,7 +203,17 @@ export default function Challenges({ route }) {
           {formatDateTime(proof.submittedAt)}
         </Text>
 
-        {proof.aiValid != null && (
+        {proof.aiInappropriate ? (
+          <View style={{
+            flexDirection: 'row', alignItems: 'center', marginBottom: 6,
+            backgroundColor: '#ffebee',
+            borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4,
+          }}>
+            <Text style={{ fontSize: 11, color: '#c62828' }}>
+              conteúdo inapropriado
+            </Text>
+          </View>
+        ) : proof.aiValid != null ? (
           <View style={{
             flexDirection: 'row', alignItems: 'center', marginBottom: 6,
             backgroundColor: proof.aiValid ? '#e8f5e9' : '#fff3e0',
@@ -214,7 +224,7 @@ export default function Challenges({ route }) {
               {proof.aiConfidence != null ? ` · ${Math.round(proof.aiConfidence * 100)}%` : ''}
             </Text>
           </View>
-        )}
+        ) : null}
 
         {proof.rejectionReason ? (
           <Text variant="bodySmall" style={{ color: '#e53935', marginBottom: 6 }}>

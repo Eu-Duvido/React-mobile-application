@@ -79,6 +79,7 @@ export default function ChallengeProgress({ route }) {
   const [submitting, setSubmitting] = useState(false)
   const [approvingId, setApprovingId] = useState(null)
   const [participationId, setParticipationId] = useState(challenge?.participationId ?? null)
+  const [inlineError, setInlineError] = useState(null)
 
   const progressPercent = Math.round((challenge?.progress ?? 0) * 100)
   const daysLeft = getDaysLeft(challenge?.deadline)
@@ -177,6 +178,7 @@ export default function ChallengeProgress({ route }) {
       const asset = result.assets[0]
       setPickedAsset(asset)
       setProofType(asset.type === 'video' ? 'VIDEO' : 'PHOTO')
+      setInlineError(null)
     }
   }
 
@@ -194,12 +196,17 @@ export default function ChallengeProgress({ route }) {
       const asset = result.assets[0]
       setPickedAsset(asset)
       setProofType('PHOTO')
+      setInlineError(null)
     }
   }
 
   const handleSubmitProof = async () => {
     if (!pickedAsset) {
       Alert.alert('Selecione uma mídia', 'Tire uma foto ou escolha da galeria.')
+      return
+    }
+    if (!participationId) {
+      Alert.alert('Aguarde', 'Participação ainda sendo registrada. Tente novamente em instantes.')
       return
     }
     setSubmitting(true)
@@ -220,13 +227,17 @@ export default function ChallengeProgress({ route }) {
       }
 
       await submitProof(participationId, fileObj, mediaTypeStr, null, null)
-      Alert.alert('Enviado!', 'Evidência enviada. Aguarde a aprovação.')
       setModalVisible(false)
       setPickedAsset(null)
       setProofType('PHOTO')
+      setInlineError(null)
       await loadProofs()
     } catch (e) {
-      Alert.alert('Erro ao enviar', e.message)
+      if (e.status === 450) {
+        setInlineError('Conteúdo inapropriado')
+      } else {
+        Alert.alert('Erro ao enviar', e.message)
+      }
     } finally {
       setSubmitting(false)
     }
@@ -236,6 +247,7 @@ export default function ChallengeProgress({ route }) {
     if (submitting) return
     setModalVisible(false)
     setPickedAsset(null)
+    setInlineError(null)
   }
 
   const renderProofCard = (proof) => {
@@ -274,14 +286,27 @@ export default function ChallengeProgress({ route }) {
           </ProofMeta>
         </ProofRow>
 
-        {proof.aiValid != null && (
-          <AIPill valid={proof.aiValid}>
-            <AIPillText valid={proof.aiValid}>
-              {proof.aiValid ? '✓ IA válida' : '⚠ IA inválida'}
-              {proof.aiConfidence != null ? ` · ${Math.round(proof.aiConfidence * 100)}%` : ''}
+        {proof.aiInappropriate ? (
+          <AIPill valid={false} style={{ backgroundColor: '#ffebee' }}>
+            <AIPillText valid={false} style={{ color: '#c62828' }}>
+              conteúdo inapropriado
             </AIPillText>
           </AIPill>
-        )}
+        ) : proof.aiValid != null ? (
+          <>
+            <AIPill valid={proof.aiValid}>
+              <AIPillText valid={proof.aiValid}>
+                {proof.aiValid ? '✓ IA válida' : '⚠ IA inválida'}
+                {proof.aiConfidence != null ? ` · ${Math.round(proof.aiConfidence * 100)}%` : ''}
+              </AIPillText>
+            </AIPill>
+            {!proof.aiValid && proof.aiReason ? (
+              <Text variant="bodySmall" style={{ color: '#888', marginTop: 4, fontStyle: 'italic' }}>
+                {proof.aiReason}
+              </Text>
+            ) : null}
+          </>
+        ) : null}
 
         {proof.rejectionReason ? (
           <RejectionBox>
@@ -480,6 +505,15 @@ export default function ChallengeProgress({ route }) {
               >
                 Trocar mídia
               </Button>
+            )}
+
+            {inlineError && (
+              <Text
+                variant="bodyMedium"
+                style={{ color: '#c62828', textAlign: 'center', marginBottom: 4 }}
+              >
+                {inlineError}
+              </Text>
             )}
 
             {pickedAsset && (

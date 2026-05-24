@@ -49,7 +49,10 @@ const multipartRequest = (method, path, formData) =>
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve(data)
         } else {
-          reject(new Error(data?.message || `Erro ${xhr.status}`))
+          const err = new Error(data?.message || `Erro ${xhr.status}`)
+          err.status = xhr.status
+          err.data = data
+          reject(err)
         }
       } catch {
         reject(new Error('Erro ao processar resposta do servidor'))

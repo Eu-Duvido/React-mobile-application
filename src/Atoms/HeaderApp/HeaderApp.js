@@ -20,7 +20,7 @@ export class HeaderApp extends Component {
         <Avatar.Text size={48} label="SL" />
             </View>
            
-          <Text style = {{opacity: 0.7}} variant="bodyLarge">Vamos se desafiar?</Text>
+          <Text style = {{opacity: 0.7}} variant="bodyLarge">Vamos nos desafiar?</Text>
         </View>
       
       </NavBar>
