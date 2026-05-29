@@ -1,0 +1,44 @@
+{
+  "createChallenge": {
+    "header": "Novo Desafio",
+    "fields": {
+      "title": "TÍTULO",
+      "titlePlaceholder": "Ex: Ler cinco livros",
+      "description": "DESCRIÇÃO",
+      "descriptionPlaceholder": "Descreva o desafio em detalhes...",
+      "deadline": "PRAZO",
+      "daysOption": "{{count}} dias",
+      "subject": "MATÉRIA / ÁREA (opcional)",
+      "subjectPlaceholder": "Ex: Matemática, Programação...",
+      "difficulty": "DIFICULDADE",
+      "goalType": "TIPO DE META",
+      "goalValue": "VALOR DA META (número)",
+      "goalValuePlaceholder": "Ex: 10 (horas, páginas, etc.)",
+      "options": "OPÇÕES",
+      "locationRequired": "Exigir localização como prova"
+    },
+    "difficulty": {
+      "EASY": "Fácil",
+      "MEDIUM": "Médio",
+      "HARD": "Difícil"
+    },
+    "goalType": {
+      "HOURS": "Horas",
+      "PAGES": "Páginas",
+      "EXERCISES": "Exercícios",
+      "SESSIONS": "Sessões",
+      "CUSTOM": "Personalizado"
+    },
+    "invite": {
+      "sectionTitle": "Convidar amigos",
+      "noUsers": "Nenhum outro usuário cadastrado ainda"
+    },
+    "submit": "Criar desafio",
+    "errors": {
+      "requiredFields": "Preencha título e descrição",
+      "invalidGoal": "Valor da meta deve ser um número maior que zero",
+      "pastDeadline": "O prazo deve ser uma data futura",
+      "generic": "Erro ao criar desafio"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "createChallenge": {
+    "header": "New Challenge",
+    "fields": {
+      "title": "TITLE",
+      "titlePlaceholder": "E.g.: Read five books",
+      "description": "DESCRIPTION",
+      "descriptionPlaceholder": "Describe the challenge in detail...",
+      "deadline": "DEADLINE",
+      "daysOption": "{{count}} days",
+      "subject": "SUBJECT / AREA (optional)",
+      "subjectPlaceholder": "E.g.: Math, Programming...",
+      "difficulty": "DIFFICULTY",
+      "goalType": "GOAL TYPE",
+      "goalValue": "GOAL VALUE (number)",
+      "goalValuePlaceholder": "E.g.: 10 (hours, pages, etc.)",
+      "options": "OPTIONS",
+      "locationRequired": "Require location as proof"
+    },
+    "difficulty": {
+      "EASY": "Easy",
+      "MEDIUM": "Medium",
+      "HARD": "Hard"
+    },
+    "goalType": {
+      "HOURS": "Hours",
+      "PAGES": "Pages",
+      "EXERCISES": "Exercises",
+      "SESSIONS": "Sessions",
+      "CUSTOM": "Custom"
+    },
+    "invite": {
+      "sectionTitle": "Invite friends",
+      "noUsers": "No other users registered yet"
+    },
+    "submit": "Create challenge",
+    "errors": {
+      "requiredFields": "Please fill in title and description",
+      "invalidGoal": "Goal value must be a number greater than zero",
+      "pastDeadline": "The deadline must be a future date",
+      "generic": "Error creating challenge"
+    }
+  }
+}

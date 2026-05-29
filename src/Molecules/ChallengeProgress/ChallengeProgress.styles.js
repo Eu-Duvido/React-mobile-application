@@ -171,9 +171,9 @@ export const StatusPillText = styled.Text`
 `
 
 export const AIPill = styled.View`
-  padding: 3px 10px;
-  border-radius: 999px;
-  background-color: ${({ valid }) => (valid ? '#e8f5e9' : '#fff3e0')};
+  padding: 4px 10px;
+  border-radius: 8px;
+  background-color: ${({ valid }) => (valid ? '#e8f5e9' : '#ffebee')};
   margin-top: 8px;
   align-self: flex-start;
 `
@@ -181,7 +181,7 @@ export const AIPill = styled.View`
 export const AIPillText = styled.Text`
   font-size: 10px;
   font-weight: 600;
-  color: ${({ valid }) => (valid ? '#388e3c' : '#f57c00')};
+  color: ${({ valid }) => (valid ? '#388e3c' : '#e53935')};
 `
 
 export const RejectionBox = styled.View`

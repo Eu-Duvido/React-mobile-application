@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { View, Switch, TouchableOpacity, ScrollView } from 'react-native'
-import { TextInput, ActivityIndicator, Checkbox, Text, Icon, Button } from 'react-native-paper'
-import DateTimePicker from '@react-native-community/datetimepicker'
+import { View, Switch, TouchableOpacity } from 'react-native'
+import { TextInput, ActivityIndicator, Checkbox, Text, Button, Icon } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
+import { useTranslation } from 'react-i18next'
 import { useUserContext } from '../../contexts/UserContext'
 import { createChallenge } from '../../services/challengeService'
 import { createParticipation } from '../../services/participationService'
@@ -24,33 +24,28 @@ import {
   ErrorMsg,
 } from './CreateChallenge.styles'
 
-const DIFFICULTY_OPTIONS = [
-  { value: 'EASY', label: 'Fácil' },
-  { value: 'MEDIUM', label: 'Médio' },
-  { value: 'HARD', label: 'Difícil' },
-]
-
-const GOAL_TYPE_OPTIONS = [
-  { value: 'HOURS', label: 'Horas' },
-  { value: 'PAGES', label: 'Páginas' },
-  { value: 'EXERCISES', label: 'Exercícios' },
-  { value: 'SESSIONS', label: 'Sessões' },
-  { value: 'CUSTOM', label: 'Personalizado' },
-]
+const DIFFICULTY_VALUES = ['EASY', 'MEDIUM', 'HARD']
+const GOAL_TYPE_VALUES = ['HOURS', 'PAGES', 'EXERCISES', 'SESSIONS', 'CUSTOM']
+const DEADLINE_DAYS_OPTIONS = [7, 15, 30, 60]
 
 export default function CreateChallenge() {
   const navigation = useNavigation()
+  const { t } = useTranslation()
   const { user } = useUserContext()
+
+  const difficultyOptions = DIFFICULTY_VALUES.map((v) => ({
+    value: v,
+    label: t(`createChallenge.difficulty.${v}`),
+  }))
+
+  const goalTypeOptions = GOAL_TYPE_VALUES.map((v) => ({
+    value: v,
+    label: t(`createChallenge.goalType.${v}`),
+  }))
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [deadlineDate, setDeadlineDate] = useState(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 7)
-    d.setSeconds(0, 0)
-    return d
-  })
-  const [pickerMode, setPickerMode] = useState(null) // 'date' | 'time' | null
+  const [deadlineDays, setDeadlineDays] = useState(7)
   const [locationRequired, setLocationRequired] = useState(false)
   const [difficulty, setDifficulty] = useState('MEDIUM')
   const [subject, setSubject] = useState('')
@@ -63,29 +58,12 @@ export default function CreateChallenge() {
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [error, setError] = useState(null)
 
-  const pad = (n) => String(n).padStart(2, '0')
-  const formatDisplay = (d) =>
-    `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}  ${pad(d.getHours())}:${pad(d.getMinutes())}`
-  const toISODeadline = (d) =>
-    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`
-
-  const onPickerChange = (event, selected) => {
-    if (event.type === 'dismissed') {
-      setPickerMode(null)
-      return
-    }
-    if (!selected) return
-    if (pickerMode === 'date') {
-      const merged = new Date(selected)
-      merged.setHours(deadlineDate.getHours(), deadlineDate.getMinutes(), 0, 0)
-      setDeadlineDate(merged)
-      setPickerMode('time')
-    } else {
-      const merged = new Date(deadlineDate)
-      merged.setHours(selected.getHours(), selected.getMinutes(), 0, 0)
-      setDeadlineDate(merged)
-      setPickerMode(null)
-    }
+  const computeDeadline = (days) => {
+    const pad = (n) => String(n).padStart(2, '0')
+    const d = new Date()
+    d.setDate(d.getDate() + days)
+    d.setSeconds(0, 0)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`
   }
 
   useEffect(() => {
@@ -111,26 +89,21 @@ export default function CreateChallenge() {
 
   const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
-      setError('Preencha título e descrição')
+      setError(t('createChallenge.errors.requiredFields'))
       return
     }
     const parsedGoal = parseInt(goalValue, 10)
     if (isNaN(parsedGoal) || parsedGoal < 1) {
-      setError('Valor da meta deve ser um número maior que zero')
+      setError(t('createChallenge.errors.invalidGoal'))
       return
     }
-    if (deadlineDate <= new Date()) {
-      setError('O prazo deve ser uma data futura')
-      return
-    }
-
     setLoading(true)
     setError(null)
     try {
       const challenge = await createChallenge({
         title,
         description,
-        deadline: toISODeadline(deadlineDate),
+        deadline: computeDeadline(deadlineDays),
         locationRequired,
         difficulty,
         subject: subject.trim() || null,
@@ -145,7 +118,7 @@ export default function CreateChallenge() {
 
       navigation.goBack()
     } catch (e) {
-      setError(e.message || 'Erro ao criar desafio')
+      setError(e.message || t('createChallenge.errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -178,15 +151,15 @@ export default function CreateChallenge() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon source="arrow-left" size={24} color="#1c1c1e" />
         </TouchableOpacity>
-        <HeaderTitle>Novo Desafio</HeaderTitle>
+        <HeaderTitle>{t('createChallenge.header')}</HeaderTitle>
         <View style={{ width: 24 }} />
       </Header>
 
       <Body>
-        <FieldLabel>TÍTULO</FieldLabel>
+        <FieldLabel>{t('createChallenge.fields.title')}</FieldLabel>
         <TextInput
           mode="outlined"
-          placeholder="Ex: Ler cinco livros"
+          placeholder={t('createChallenge.fields.titlePlaceholder')}
           value={title}
           onChangeText={setTitle}
           outlineStyle={{ borderRadius: 14 }}
@@ -194,10 +167,10 @@ export default function CreateChallenge() {
           outlineColor="#e0e0e0"
         />
 
-        <FieldLabel>DESCRIÇÃO</FieldLabel>
+        <FieldLabel>{t('createChallenge.fields.description')}</FieldLabel>
         <TextInput
           mode="outlined"
-          placeholder="Descreva o desafio em detalhes..."
+          placeholder={t('createChallenge.fields.descriptionPlaceholder')}
           value={description}
           onChangeText={setDescription}
           multiline
@@ -207,40 +180,27 @@ export default function CreateChallenge() {
           outlineColor="#e0e0e0"
         />
 
-        <FieldLabel>PRAZO</FieldLabel>
-        <TouchableOpacity
-          onPress={() => setPickerMode('date')}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderWidth: 1,
-            borderColor: '#e0e0e0',
-            borderRadius: 14,
-            paddingHorizontal: 14,
-            paddingVertical: 16,
-            marginBottom: 4,
-            backgroundColor: '#fff',
-          }}
-        >
-          <Text style={{ fontSize: 16, color: '#1c1c1e' }}>{formatDisplay(deadlineDate)}</Text>
-          <Icon source="calendar-clock" size={20} color="#666" />
-        </TouchableOpacity>
+        <FieldLabel>{t('createChallenge.fields.deadline')}</FieldLabel>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
+          {DEADLINE_DAYS_OPTIONS.map((days) => (
+            <Button
+              key={days}
+              mode={deadlineDays === days ? 'contained' : 'outlined'}
+              onPress={() => setDeadlineDays(days)}
+              buttonColor={deadlineDays === days ? '#1c1c1e' : undefined}
+              textColor={deadlineDays === days ? '#fff' : '#1c1c1e'}
+              style={{ borderRadius: 10 }}
+              compact
+            >
+              {t('createChallenge.fields.daysOption', { count: days })}
+            </Button>
+          ))}
+        </View>
 
-        {pickerMode != null && (
-          <DateTimePicker
-            value={deadlineDate}
-            mode={pickerMode}
-            display="default"
-            minimumDate={pickerMode === 'date' ? new Date() : undefined}
-            onChange={onPickerChange}
-          />
-        )}
-
-        <FieldLabel>MATÉRIA / ÁREA (opcional)</FieldLabel>
+        <FieldLabel>{t('createChallenge.fields.subject')}</FieldLabel>
         <TextInput
           mode="outlined"
-          placeholder="Ex: Matemática, Programação..."
+          placeholder={t('createChallenge.fields.subjectPlaceholder')}
           value={subject}
           onChangeText={setSubject}
           outlineStyle={{ borderRadius: 14 }}
@@ -248,13 +208,13 @@ export default function CreateChallenge() {
           outlineColor="#e0e0e0"
         />
 
-        {renderSelector('DIFICULDADE', DIFFICULTY_OPTIONS, difficulty, setDifficulty)}
-        {renderSelector('TIPO DE META', GOAL_TYPE_OPTIONS, goalType, setGoalType)}
+        {renderSelector(t('createChallenge.fields.difficulty'), difficultyOptions, difficulty, setDifficulty)}
+        {renderSelector(t('createChallenge.fields.goalType'), goalTypeOptions, goalType, setGoalType)}
 
-        <FieldLabel>VALOR DA META (número)</FieldLabel>
+        <FieldLabel>{t('createChallenge.fields.goalValue')}</FieldLabel>
         <TextInput
           mode="outlined"
-          placeholder="Ex: 10 (horas, páginas, etc.)"
+          placeholder={t('createChallenge.fields.goalValuePlaceholder')}
           value={goalValue}
           onChangeText={setGoalValue}
           keyboardType="numeric"
@@ -263,9 +223,9 @@ export default function CreateChallenge() {
           outlineColor="#e0e0e0"
         />
 
-        <FieldLabel>OPÇÕES</FieldLabel>
+        <FieldLabel>{t('createChallenge.fields.options')}</FieldLabel>
         <ToggleRow>
-          <ToggleLabel>Exigir localização como prova</ToggleLabel>
+          <ToggleLabel>{t('createChallenge.fields.locationRequired')}</ToggleLabel>
           <Switch
             value={locationRequired}
             onValueChange={setLocationRequired}
@@ -274,12 +234,12 @@ export default function CreateChallenge() {
           />
         </ToggleRow>
 
-        <SectionTitle>Convidar amigos</SectionTitle>
+        <SectionTitle>{t('createChallenge.invite.sectionTitle')}</SectionTitle>
         {loadingUsers ? (
           <ActivityIndicator color="#1c1c1e" style={{ marginVertical: 16 }} />
         ) : users.length === 0 ? (
           <Text style={{ fontFamily: 'Sora', fontSize: 13, opacity: 0.45 }}>
-            Nenhum outro usuário cadastrado ainda
+            {t('createChallenge.invite.noUsers')}
           </Text>
         ) : (
           users.map((u) => {
@@ -300,7 +260,7 @@ export default function CreateChallenge() {
           {loading ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
-            <SubmitLabel>Criar desafio</SubmitLabel>
+            <SubmitLabel>{t('createChallenge.submit')}</SubmitLabel>
           )}
         </SubmitButton>
 
