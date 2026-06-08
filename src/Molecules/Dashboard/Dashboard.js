@@ -412,18 +412,35 @@ function RankingSection({ ranking, dailyPoints }) {
 }
 
 /* ── Seção 5: Insights Inteligentes ─────────────────────────────────────── */
-function InsightsSection({ d }) {
-  const insights = generateInsights(
+function InsightsSection({ d, aiInsights, loadingAi }) {
+  const fallbackInsights = generateInsights(
     d.challengeMetrics, d.evidenceMetrics, d.engagementMetrics,
     d.ranking, d.dailyPoints, d.resumoGeral, d.genero, d.etaria, d.ead
   )
+
+  // Enquanto IA carrega e ainda não temos resultado, mostra indicador leve
+  if (loadingAi && !aiInsights) {
+    return (
+      <View style={{
+        flexDirection: 'row', alignItems: 'center', gap: 10,
+        backgroundColor: T.card, borderRadius: 16, padding: 14,
+        marginBottom: 10, elevation: 2,
+      }}>
+        <ActivityIndicator size="small" color={T.blue} />
+        <Text style={{ fontSize: 13, color: T.sub }}>Gerando insights com IA…</Text>
+      </View>
+    )
+  }
+
+  const isAi     = aiInsights && aiInsights.length > 0
+  const insights = isAi ? aiInsights : fallbackInsights
   if (!insights.length) return null
 
   return (
     <>
       {insights.map((ins, i) => (
         <View key={i} style={{
-          backgroundColor: ins.bg, borderRadius: 16,
+          backgroundColor: ins.bg ?? (ins.color + '15'), borderRadius: 16,
           borderLeftWidth: 4, borderLeftColor: ins.color,
           padding: 14, marginBottom: 10,
           flexDirection: 'row', alignItems: 'flex-start', gap: 10,
@@ -445,7 +462,7 @@ function InsightsSection({ d }) {
 export default function Dashboard() {
   const navigation = useNavigation()
   const insets     = useSafeAreaInsets()
-  const { data, loading, error, refetch } = useUnifiedDashboard()
+  const { data, loading, error, aiInsights, loadingAi, refetch } = useUnifiedDashboard()
 
   return (
     <View style={{ flex: 1, backgroundColor: T.bg }}>
@@ -540,9 +557,9 @@ export default function Dashboard() {
           <SectionTitle
             icon="lightbulb-outline"
             title="Insights Inteligentes"
-            subtitle="Derivados dos dados reais — app × INEP"
+            subtitle={aiInsights?.length > 0 ? '✨ Gerado por IA (Gemini)' : 'Derivados dos dados reais — app × INEP'}
           />
-          <InsightsSection d={data} />
+          <InsightsSection d={data} aiInsights={aiInsights} loadingAi={loadingAi} />
 
         </ScrollView>
       ) : null}

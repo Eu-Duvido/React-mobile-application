@@ -1,11 +1,28 @@
 import { useState, useEffect, useCallback } from 'react'
 import * as appSvc  from '../services/dashboardService'
 import * as inepSvc from '../services/inepDashboardService'
+import { getAiInsights } from '../services/aiInsightsService'
 
 export function useUnifiedDashboard() {
-  const [data, setData]     = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState(null)
+  const [data, setData]         = useState(null)
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState(null)
+  const [aiInsights, setAiInsights] = useState(null)
+  const [loadingAi, setLoadingAi]   = useState(false)
+
+  const fetchAiInsights = useCallback(async () => {
+    setLoadingAi(true)
+    try {
+      const result = await getAiInsights()
+      const insights = result?.insights ?? []
+      setAiInsights(insights.length > 0 ? insights : null)
+    } catch {
+      // Fallback silencioso: generateInsights() do mapper será usado
+      setAiInsights(null)
+    } finally {
+      setLoadingAi(false)
+    }
+  }, [])
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -48,7 +65,15 @@ export function useUnifiedDashboard() {
     }
   }, [])
 
-  useEffect(() => { fetchAll() }, [fetchAll])
+  const refetch = useCallback(() => {
+    fetchAll()
+    fetchAiInsights()
+  }, [fetchAll, fetchAiInsights])
 
-  return { data, loading, error, refetch: fetchAll }
+  useEffect(() => {
+    fetchAll()
+    fetchAiInsights()
+  }, [fetchAll, fetchAiInsights])
+
+  return { data, loading, error, aiInsights, loadingAi, refetch }
 }
