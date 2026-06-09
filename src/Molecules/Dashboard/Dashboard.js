@@ -525,7 +525,23 @@ export default function Dashboard() {
             resumoGeral={data.resumoGeral}
           />
 
-          {/* ── 2. Perfil da Audiência ────────────────────────────────── */}
+          {/* ── 2. Insights Inteligentes ─────────────────────────────── */}
+          <SectionTitle
+            icon="lightbulb-outline"
+            title="Insights Inteligentes"
+            subtitle={aiInsights?.length > 0 ? '✨ Gerado por IA (Gemini)' : 'Derivados dos dados reais — app × INEP'}
+          />
+          <InsightsSection d={data} aiInsights={aiInsights} loadingAi={loadingAi} />
+
+          {/* ── 3. Ranking & Engajamento ──────────────────────────────── */}
+          <SectionTitle
+            icon="trophy-outline"
+            title="Ranking & Engajamento"
+            subtitle="Quem lidera e com qual frequência"
+          />
+          <RankingSection ranking={data.ranking} dailyPoints={data.dailyPoints} />
+
+          {/* ── 4. Perfil da Audiência ────────────────────────────────── */}
           <SectionTitle
             icon="account-group-outline"
             title="Perfil da Audiência"
@@ -537,29 +553,13 @@ export default function Dashboard() {
             ead={data.ead}
           />
 
-          {/* ── 3. Inteligência de Desafios ───────────────────────────── */}
+          {/* ── 5. Inteligência de Desafios ───────────────────────────── */}
           <SectionTitle
             icon="brain"
             title="Inteligência de Desafios"
             subtitle="O que funciona, o que precisa de atenção"
           />
           <ChallengeSection challengeMetrics={data.challengeMetrics} />
-
-          {/* ── 4. Ranking & Engajamento ──────────────────────────────── */}
-          <SectionTitle
-            icon="trophy-outline"
-            title="Ranking & Engajamento"
-            subtitle="Quem lidera e com qual frequência"
-          />
-          <RankingSection ranking={data.ranking} dailyPoints={data.dailyPoints} />
-
-          {/* ── 5. Insights Inteligentes ─────────────────────────────── */}
-          <SectionTitle
-            icon="lightbulb-outline"
-            title="Insights Inteligentes"
-            subtitle={aiInsights?.length > 0 ? '✨ Gerado por IA (Gemini)' : 'Derivados dos dados reais — app × INEP'}
-          />
-          <InsightsSection d={data} aiInsights={aiInsights} loadingAi={loadingAi} />
 
         </ScrollView>
       ) : null}
